@@ -1,0 +1,6 @@
+
+RewriteEngine On
+
+# archives
+RewriteCond %{REQUEST_FILENAME} !-f
+RewriteRule ^(.*)  archives.php?params=$1 [L]
