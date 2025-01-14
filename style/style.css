@@ -1,3 +1,15 @@
 #archives-nav ul {
   list-style: none;
 }
+/* body {
+  background: red;
+} */
+
+ul li a {
+  text-decoration: none;
+  list-style: none;
+}
+
+main ul li a {
+  text-decoration: none;
+}

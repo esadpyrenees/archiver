@@ -10,6 +10,7 @@ include_once '_inc/ParsedownExtra.php';
   }
 
   // $archivesdir = '../../archives';
+  //peut être mettre ça dans une variable pour que ce soit plus lisible
   $archivesdir = dirname(__FILE__) . "/root";
   $currentdir = $archivesdir . $params; 
   
@@ -19,7 +20,7 @@ include_once '_inc/ParsedownExtra.php';
 
   <main class="pane active" id="content">
     <link rel="stylesheet" href="style/style.css">
-  <h1>Archives</h1>
+  <h1>Archives</h1> 
     <nav class="archives-nav">
       <!-- L’archivisme est un exercice délicat ☺<br><br> -->
       <p>☺</p>
@@ -30,19 +31,23 @@ include_once '_inc/ParsedownExtra.php';
         // browse currentdir, looking for subdirs or index*
         foreach (new DirectoryIterator($currentdir) as $fileinfo) {
           if ($fileinfo->isDot()) continue; // Ignore . et ..
-          if ($fileinfo->isDir()) {
-              // Sous-dossier trouvé
+                        
+          if ($fileinfo->isDir()) {// Subfolder find 
+            $folderPath = $fileinfo->getPathname();
               $results[] = [
                   'path' => $fileinfo->getFilename() . '/',
                   'name' => $fileinfo->getFilename() . '/',
-                  'is_empty' => isEmpty($fileinfo->getPathname())
+                  'is_empty' => isEmpty($folderPath),
+                  'size' => sizeFilter(folderSize($folderPath))
+                  
               ];
           } elseif (in_array($fileinfo->getExtension(), $cool_extensions)) {
-              // Fichier trouvé (avec une extension cool)
               $results[] = [
                   'path' => $fileinfo->getFilename(),
                   'name' => $fileinfo->getFilename(),
-                  'is_empty' => false
+                  'is_empty' => false,
+                  'size' => sizeFilter(filesize($fileinfo->getPathname())) // Taille des fichiers
+
               ];
           }
         }
@@ -62,17 +67,14 @@ echo "</ul>
 <ul>";
 foreach ($results as $dir) {
   if ($dir['is_empty']) {
-  echo "<li><a href='" . $dir['path'] . "'>" . $dir['name'] . "</a></li>";
+  echo "<li><a href='" . $dir['path'] . "'>" . $dir['name'] .   "</a></li>";
 }
 else {
-echo "<li><a href='" . $dir['path'] . "'>" . $dir['name'] . "</a></li>";
+echo "<li><a href='" . $dir['path'] . "'>" . $dir['name'] . "" . $dir['size'] . "</a></li>";
 
 }
 }
 echo "</ul>";
-
-
-
 
 // Display the content of index.md if it exists
 $mdindex = hasMDIndex($currentdir);
