@@ -62,7 +62,7 @@ echo "</ul>
 <ul>";
 foreach ($results as $dir) {
   if ($dir['is_empty']) {
-  echo "<li>fils de poute <a href='" . $dir['path'] . "'>" . $dir['name'] . "</a></li>";
+  echo "<li><a href='" . $dir['path'] . "'>" . $dir['name'] . "</a></li>";
 }
 else {
 echo "<li><a href='" . $dir['path'] . "'>" . $dir['name'] . "</a></li>";
