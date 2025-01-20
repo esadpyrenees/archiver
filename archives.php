@@ -10,7 +10,8 @@ include_once '_inc/ParsedownExtra.php';
   }
 
   // $archivesdir = '../../archives';
-  //peut être mettre ça dans une variable pour que ce soit plus lisible
+
+  //Maybe put this on a variable to be able to change it simplier if needed
   $archivesdir = dirname(__FILE__) . "/root";
   $currentdir = $archivesdir . $params; 
   
@@ -19,8 +20,8 @@ include_once '_inc/ParsedownExtra.php';
 ?> 
 
   <main class="pane active" id="content">
-    <link rel="stylesheet" href="style/style.css">
-  <h1>Archives</h1> 
+    <link rel="stylesheet" href="/lister/style/style.css">
+      <h1>Archives</h1> 
     <nav class="archives-nav">
       <!-- L’archivisme est un exercice délicat ☺<br><br> -->
       <p>☺</p>
@@ -38,7 +39,7 @@ include_once '_inc/ParsedownExtra.php';
                   'path' => $fileinfo->getFilename() . '/',
                   'name' => $fileinfo->getFilename() . '/',
                   'is_empty' => isEmpty($folderPath),
-                  'size' => sizeFilter(folderSize($folderPath))
+                  'size' => sizeFilter(calculateFolderSize($folderPath))
                   
               ];
           } elseif (in_array($fileinfo->getExtension(), $cool_extensions)) {
@@ -52,7 +53,7 @@ include_once '_inc/ParsedownExtra.php';
           }
         }
 
-        echo "<ul style='list-style:none'>";
+        echo "<ul class='parentFolder'>";
         if ($params) {
           $up = dirname($currentdir);
           $upname = basename($up);
@@ -63,18 +64,18 @@ rsort($results);
 echo "</ul>
 
 
-
-<ul>";
+<div class='displayFolders'>
+<ul style='list-style:none'>";
 foreach ($results as $dir) {
   if ($dir['is_empty']) {
-  echo "<li><a href='" . $dir['path'] . "'>" . $dir['name'] .   "</a></li>";
+  echo "<li class='file-info'> • <a href='" . $dir['path'] . "'>" . $dir['name'] .   "</a></li>";
 }
 else {
-echo "<li><a href='" . $dir['path'] . "'>" . $dir['name'] . "" . $dir['size'] . "</a></li>";
-
+echo "<li class='file-info'><a href='" . $dir['path'] . "'>" . $dir['name'] . "" . "</a> <p>(" . $dir['size'] . ")</p></li>";
 }
 }
-echo "</ul>";
+echo "</ul>
+</div>";
 
 // Display the content of index.md if it exists
 $mdindex = hasMDIndex($currentdir);

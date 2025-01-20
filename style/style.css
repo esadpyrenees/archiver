@@ -1,15 +1,34 @@
 #archives-nav ul {
   list-style: none;
 }
-/* body {
-  background: red;
-} */
 
 ul li a {
   text-decoration: none;
   list-style: none;
 }
 
-main ul li a {
-  text-decoration: none;
+#displayfolders ul li {
+  color: red;
+  text-align: center;
+}
+
+.file-info {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.file-info a {
+  flex: 1;
+  text-align: left;
+}
+
+.file-info p {
+  flex: 1;
+  text-align: center;
+  margin: 0px;
+}
+
+.parentFolder {
+  list-style: none;
 }

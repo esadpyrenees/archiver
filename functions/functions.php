@@ -37,12 +37,12 @@ function hasIndex($dir){
   }
   
 
-  function folderSize ($dir)
+  function calculateFolderSize ($dir)
 {
     $size = 0;
 
     foreach (glob(rtrim($dir, '/').'/*', GLOB_NOSORT) as $each) {
-        $size += is_file($each) ? filesize($each) : folderSize($each);
+        $size += is_file($each) ? filesize($each) : calculateFolderSize($each);
     }
 
     return $size;
@@ -61,6 +61,9 @@ function sizeFilter($bytes)
 
         return (round($bytes, 2) . " " . $label[$i]);
     }
+
+
+    
 
 
   ?>
