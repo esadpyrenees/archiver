@@ -5,11 +5,11 @@
 ul li a {
   text-decoration: none;
   list-style: none;
+  color: black;
 }
 
-#displayfolders ul li {
-  color: red;
-  text-align: center;
+ul li a:hover {
+  color: blue;
 }
 
 .file-info {

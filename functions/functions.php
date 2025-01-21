@@ -63,7 +63,37 @@ function sizeFilter($bytes)
     }
 
 
-    
+    //trying this function to cache the folders size to optimise application
+  function getCachedFolderSize($dir){
+    $cacheFile = sys_get_temp_dir() . "folder_size_cache_" . md5($dir)	. '.txt' ;
+    if (file_exists($cacheFile) && (time() - filemtime($cacheFile) < 3600)){
+      return file_get_contents($cacheFile);
+    } else {
+      $size = calculateFolderSize($dir);
+      file_put_contents($cacheFile, $size);
+      return $size;
+    }
+  }
+
+  //function to clear cache
+  function clearCache($dir){
+    $cacheFile = sys_get_temp_dir() . "/folder_size_cache_" .md5($dir) . '.txt';
+    if (file_exists($cacheFile)){
+      unlink($cacheFile);
+    }
+  }
+
+
+  //fonctions pour pouvoir tester la performance de la mise en cache et de l'affichage des tailles des dossiers
+
+  function startTimer() {
+  return microTime(true);
+  }
+
+  function endTimer($start) {
+    return microTime(true) - $start;
+  }
+
 
 
   ?>
