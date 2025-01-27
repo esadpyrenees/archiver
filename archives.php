@@ -2,7 +2,6 @@
 include_once 'functions/functions.php';
 include_once '_inc/Parsedown.php';
 include_once '_inc/ParsedownExtra.php';
-
 $params = '';
 if (isset($_GET['params'])) {
   $params = '/' . $_GET['params'];
@@ -10,7 +9,6 @@ if (isset($_GET['params'])) {
 
 // $archivesdir = '../../archives';
 
-//Maybe but this on a variable to be able to change it simplier if needed
 $archivesdir = dirname(__FILE__) . "/archives";
 $currentdir = $archivesdir . $params; 
 
@@ -71,7 +69,8 @@ foreach (new DirectoryIterator($currentdir) as $fileinfo) {
       if ($params) {
         $up = dirname($currentdir);
         $upname = basename($up);
-        echo "<li><a href='../'/>← $upname</a></li>";
+        $currentFolderName = basename($currentdir);	
+        echo "<li><a href='../'/>← $upname / $currentFolderName</a></li>";
       }
       // Sort and display the directory content
       rsort($results);
@@ -80,13 +79,7 @@ foreach (new DirectoryIterator($currentdir) as $fileinfo) {
       <div class='displayFolders'>
       <ul style='list-style:none'>";
       foreach ($results as $dir) {
-        
-          // if (pathinfo($dir['path'], flags: PATHINFO_EXTENSION) == 'html') {
-          //   //on vérifie le lien html
-          //   $filePath = $currentdir . $dir['path'];
-          //   echo "<li class='file-info'><a href='" . $dir['path'] . "' target='_blank'>" . $dir['name'] . "</a> <p>(" . $dir['size'] . ")</p></li>";
-          //   //echo "<script>console.log('Opening file: " . $currentdir . "/" . $dir['path'] . "');</script>";
-          // } else 
+
           {
             echo "<li class='file-info'><a href='" . $dir['path'] . "'>" . $dir['name'] . "</a> <p>(" . $dir['size'] . ")</p></li>";
           }
