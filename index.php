@@ -57,7 +57,7 @@ foreach (new DirectoryIterator($currentdir) as $fileinfo) {
 ?> 
 
 <main class="pane active" id="content">
-  <link rel="stylesheet" href="/lister/style/style.css">
+  <link rel="stylesheet" href="http://localhost/tmp/lister/style/style.css">
   <h1>Archives</h1> 
   <nav class="archives-nav">
     <!-- L’archivisme est un exercice délicat ☺<br><br> -->
