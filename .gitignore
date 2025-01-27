@@ -1,0 +1,11 @@
+# Ignore all archives files and folders…
+archives/*
+
+# Except this ones for main testing
+!archives/.htaccess
+!archives/index.md
+!archives/empty
+!archives/hashtmlpage
+!archives/hasindexhtml
+!archives/hasmd
+!archives/hassubdir
