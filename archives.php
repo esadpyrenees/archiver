@@ -11,7 +11,7 @@ if (isset($_GET['params'])) {
 // $archivesdir = '../../archives';
 
 //Maybe but this on a variable to be able to change it simplier if needed
-$archivesdir = dirname(__FILE__) . "/root";
+$archivesdir = dirname(__FILE__) . "/archives";
 $currentdir = $archivesdir . $params; 
 
 // markdown!
@@ -24,6 +24,7 @@ $results = array();
 $cool_extensions = Array('jpg','png','pdf','gif','webp','html','zip', 'css', 'js');
 
 // browse currentdir, looking for subdirs or index*
+  if(is_dir($currentdir)){
 foreach (new DirectoryIterator($currentdir) as $fileinfo) {
   if ($fileinfo->isDot()) continue; // Ignore . et ..
                 
@@ -35,6 +36,7 @@ foreach (new DirectoryIterator($currentdir) as $fileinfo) {
         'is_empty' => isEmpty($folderPath),
         'size' => sizeFilter(getCachedFolderSize($folderPath))
     ];
+  
   } elseif (in_array($fileinfo->getExtension(), $cool_extensions)) {
     $results[] = [
         'path' => $fileinfo->getFilename(),
@@ -44,10 +46,15 @@ foreach (new DirectoryIterator($currentdir) as $fileinfo) {
     ];
   }
 }
-
-// End timer for cached size calculation
-//$timeCached = endTimer($startCached);
-
+} elseif (is_file($currentdir)){
+  if(pathinfo($currentdir, PATHINFO_EXTENSION) === 'html') {
+    header("Location" . $_GET['params']);
+    exit;
+  } else{
+    echo " Error : THe specified path is not a directory or a valid HTML File.";
+    exit;
+  }
+}
 
 ?> 
 
@@ -57,7 +64,9 @@ foreach (new DirectoryIterator($currentdir) as $fileinfo) {
   <nav class="archives-nav">
     <!-- L’archivisme est un exercice délicat ☺<br><br> -->
     <p>☺</p>
+    
     <?php
+    
       echo "<ul class='parentFolder'>";
       if ($params) {
         $up = dirname($currentdir);
@@ -71,12 +80,18 @@ foreach (new DirectoryIterator($currentdir) as $fileinfo) {
       <div class='displayFolders'>
       <ul style='list-style:none'>";
       foreach ($results as $dir) {
-        if ($dir['is_empty']) {
-          echo "<li class='file-info'> • <a href='" . $dir['path'] . "'>" . $dir['name'] . "</a></li>";
-        } else {
-          echo "<li class='file-info'><a href='" . $dir['path'] . "'>" . $dir['name'] . "</a> <p>(" . $dir['size'] . ")</p></li>";
+        
+          // if (pathinfo($dir['path'], flags: PATHINFO_EXTENSION) == 'html') {
+          //   //on vérifie le lien html
+          //   $filePath = $currentdir . $dir['path'];
+          //   echo "<li class='file-info'><a href='" . $dir['path'] . "' target='_blank'>" . $dir['name'] . "</a> <p>(" . $dir['size'] . ")</p></li>";
+          //   //echo "<script>console.log('Opening file: " . $currentdir . "/" . $dir['path'] . "');</script>";
+          // } else 
+          {
+            echo "<li class='file-info'><a href='" . $dir['path'] . "'>" . $dir['name'] . "</a> <p>(" . $dir['size'] . ")</p></li>";
+          }
         }
-      }
+      
       echo "</ul>
       </div>";
 
@@ -86,10 +101,6 @@ foreach (new DirectoryIterator($currentdir) as $fileinfo) {
           echo "<hr>";
           echo $Parsedown->text(file_get_contents($mdindex));
       }
-
-      // Display performance results
-      //echo "<p>Time with cache: " . $timeCached . " seconds</p>";
-      //echo "<p>Time without cache: " . $timeNonCached . " seconds</p>";
     ?>
   </nav>
 </main>

@@ -84,7 +84,7 @@ function sizeFilter($bytes)
   }
 
 
-  //fonctions pour pouvoir tester la performance de la mise en cache et de l'affichage des tailles des dossiers
+  /*fonctions pour pouvoir tester la performance de la mise en cache et de l'affichage des tailles des dossiers
 
   function startTimer() {
   return microTime(true);
@@ -93,6 +93,9 @@ function sizeFilter($bytes)
   function endTimer($start) {
     return microTime(true) - $start;
   }
+  
+
+  */
 
 
 

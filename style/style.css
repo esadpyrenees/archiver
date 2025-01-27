@@ -19,14 +19,12 @@ ul li a:hover {
 }
 
 .file-info a {
-  flex: 1;
   text-align: left;
 }
 
 .file-info p {
-  flex: 1;
-  text-align: center;
-  margin: 0px;
+  text-align: right;
+  margin: 0;
 }
 
 .parentFolder {
