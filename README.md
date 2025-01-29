@@ -1,6 +1,6 @@
 # Archivals Lister
 
-Here is a program that I created for [ESAD Pyrénées Website](https://ateliers.esad-pyrenees.fr/web/archives/) to manage and display files and folders from the HTPS Server , used to stock students projects and archivals.
+Here is a program that I created for [ESAD Pyrénées Website](https://ateliers.esad-pyrenees.fr/web/archives/) to manage and display files and folders from the FTPS Server , used to stock students projects and archivals.
 
 I created this as a part of my internship at ESAD 
 
