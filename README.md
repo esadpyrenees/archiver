@@ -10,9 +10,9 @@ This PHP  program calculate folders and sub-folders sizes and display it next to
 
 ### 🚀 Next features to add
 
-Stock the folder's size in cache to optimise the performance
-Display the upload date and calculate it on a folder by his subfolder most récent file uploaded
-Improve the styling 
+- Stock the folder's size in cache to optimise the performance
+- Display the upload date and calculate it on a folder by his subfolder most récent file uploaded
+- Improve the styling 
 
 
 ## 👥 Authors
