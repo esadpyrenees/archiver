@@ -4,7 +4,8 @@ Here is a program that I created for [ESAD Pyrénées Website](https://ateliers.
 
 I created this as a part of my internship at ESAD 
 
-## ⚙️ What does this programm do 
+## ⚙️ What does this program do 
+
 This PHP  program calculate folders and sub-folders sizes and display it next to each file/folder in the arborescence , so that we can manage if a folder is taking a lot of stockage on the servor.
 
 
