@@ -30,30 +30,40 @@ if (is_dir($currentdir)) {
         if ($fileinfo->isDir()) { // Subfolder find
             $folderPath = $fileinfo->getPathname();
             $has_forbidden = false;
+            $html_file = false;
+            $html_filename = "";
 
-            // Check if the folder contains forbidden files / add true do the boolean $has_forbidden if it does 
             foreach (new DirectoryIterator($folderPath) as $subfileinfo) {
                 if ($subfileinfo->isDot()) continue;
-                elseif (in_array($subfileinfo->getExtension(), $forbidden_extensions)) {
+
+                $extension = $subfileinfo->getExtension();
+
+                //verifier les fichiers interdits
+                if (in_array($extension, $forbidden_extensions)) {
                     $has_forbidden = true;
-                    break;
+                }
+
+                if ($extension == 'html') {
+                    $html_file = true;
+                    $html_filename = $subfileinfo->getFileName(); //saving the HTML file name
                 }
             }
-
             $results[] = [
-                'path' =>  $fileinfo->getFilename() . '/',
+                'path' =>  $fileinfo->getFilename() . '/' . ($html_file ? $html_filename : ''), //adding the path to the html file which is into the folder 
                 'name' => $fileinfo->getFilename() . '/',
                 'is_empty' => isEmpty($folderPath),
                 'size' => sizeFilter(getCachedFolderSize($folderPath)),
-                'has_forbidden' => $has_forbidden
+                'has_forbidden' => $has_forbidden,
+                'has_html' => $html_file
             ];
         } elseif (in_array($fileinfo->getExtension(), $cool_extensions)) {
             $results[] = [
                 'path' => $fileinfo->getFilename(),
                 'name' => $fileinfo->getFilename(),
                 'is_empty' => false,
-                'size' => sizeFilter(filesize($fileinfo->getPathname())), // Taille des fichiers
-                'has_forbidden' => false
+                'size' => sizeFilter(filesize($fileinfo->getPathname())),
+                'has_forbidden' => false,
+                'has_html' => ($fileinfo->getExtension() == 'html')
             ];
         }
     }
@@ -62,9 +72,7 @@ if (is_dir($currentdir)) {
 define('WARNING_GLYPH', '⚠');
 define('EMPTY_GLYPH', '●');
 
-//TODO :au niveau des warnings mettre une erreur lors de l'ouverture du dossier contenant un fichier "interdit" ? 
 //TODO : Finir de corriger les erreurs validator (8 errors 1 warning actuellement)
-//TODO : ouvrir un dossier uqi contient un fichier .html (ouvrir directement le fichier)
 //TODO : verifier la meilleure solution pour la taille des dossiers/fichiers
 
 ?>
@@ -109,7 +117,7 @@ define('EMPTY_GLYPH', '●');
                 }
                 echo "<li class='file-info'>
                  <span class='glyphs'>{$glyphs}</span>
-                    <a href='{$dir['path']}'>{$dir['name']}</a>
+                     <a href='{$dir['path']}'" . ($dir['has_html'] ? " target='_blank'" : "") . ">{$dir['name']}</a>
                     <p>({$dir['size']})</p>
                 </li>";
             }

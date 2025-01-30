@@ -28,9 +28,6 @@ function isEmpty($dir)
   return !(new \FilesystemIterator($dir))->valid();
 }
 
-
-
-
 function hasSubDirectories($dir)
 {
   foreach (new DirectoryIterator($dir) as $fileinfo) {
@@ -51,6 +48,17 @@ function calculateFolderSize($dir)
   }
 
   return $size;
+}
+
+function hasHtmlFile($dir)
+{
+  foreach (new DirectoryIterator($dir) as $fileinfo) {
+    if ($fileinfo->isDot()) continue;
+    if ($fileinfo->getExtension() == 'html') {
+      return $fileinfo->getPathname();
+    }
+  }
+  return false;
 }
 
 
