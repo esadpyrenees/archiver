@@ -1,32 +1,99 @@
-#archives-nav ul {
-  list-style: none;
-}
-
-ul li a {
-  text-decoration: none;
-  list-style: none;
-  color: black;
-}
-
-ul li a:hover {
-  color: blue;
-}
-
-.file-info {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-}
-
-.file-info a {
-  text-align: left;
-}
-
-.file-info p {
-  text-align: right;
+* {
   margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: "Segoe UI", system-ui, sans-serif;
+  line-height: 1.6;
+  color: #333;
+  background-color: #f5f5f5;
+}
+
+/* Navigation and lists */
+.archives-nav {
+  margin-top: 2rem;
 }
 
 .parentFolder {
   list-style: none;
+  margin-bottom: 2rem;
+}
+
+.parentFolder a {
+  color: #666;
+  text-decoration: none;
+  font-size: 0.9rem;
+  transition: color 0.2s ease;
+}
+
+.parentFolder a:hover {
+  color: #000;
+}
+
+/* File list styling */
+.file-info {
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  gap: 1.5rem;
+  align-items: center;
+  padding: 0.2rem 1rem;
+  border-radius: 4px;
+  transition: background-color 0.2s ease;
+}
+
+.file-info:hover {
+  background-color: #f0f0f0;
+}
+
+.file-info .glyphs {
+  color: #ff6b6b;
+  font-size: 1.1rem;
+}
+
+.file-info a {
+  color: #2c3e50;
+  text-decoration: none;
+  font-weight: 500;
+  transition: color 0.2s ease;
+}
+
+.file-info a:hover {
+  color: #3498db;
+}
+
+.file-info p {
+  color: #666;
+  font-size: 0.8rem;
+  margin: 0;
+}
+
+/* Headers */
+h1 {
+  color: #2c3e50;
+  margin-bottom: 1.5rem;
+  font-weight: 600;
+}
+
+/* Emoji styling */
+.archives-nav p {
+  font-size: 1rem;
+  margin-bottom: 1rem;
+  color: #666;
+}
+
+/* List container */
+.displayFolders ul {
+  list-style: none;
+  border: 1px solid #eee;
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+/* Markdown content */
+hr {
+  margin: 2rem 0;
+  border: none;
+  border-top: 1px solid #eee;
 }
