@@ -29,6 +29,7 @@ if (is_dir($currentdir)) {
 
         if ($fileinfo->isDir()) { // Subfolder find
             $folderPath = $fileinfo->getPathname();
+            $folderInfo = getCachedFolderInfo($folderPath);
             $has_forbidden = false;
             $html_file = false;
             $html_filename = "";
@@ -52,7 +53,8 @@ if (is_dir($currentdir)) {
                 'path' =>  $fileinfo->getFilename() . '/' . ($html_file ? $html_filename : ''), //adding the path to the html file which is into the folder 
                 'name' => $fileinfo->getFilename() . '/',
                 'is_empty' => isEmpty($folderPath),
-                'size' => sizeFilter(getCachedFolderSize($folderPath)),
+                'size' => sizeFilter($folderInfo['size']),
+                'last_modified' => $folderInfo['last_modified'],
                 'has_forbidden' => $has_forbidden,
                 'has_html' => $html_file
             ];
@@ -61,7 +63,7 @@ if (is_dir($currentdir)) {
                 'path' => $fileinfo->getFilename(),
                 'name' => $fileinfo->getFilename(),
                 'is_empty' => false,
-                'size' => sizeFilter(filesize($fileinfo->getPathname())),
+                'size' => sizeFilter($fileinfo->getSize()),
                 'has_forbidden' => false,
                 'has_html' => ($fileinfo->getExtension() == 'html')
             ];
@@ -73,7 +75,8 @@ define('WARNING_GLYPH', '⚠');
 define('EMPTY_GLYPH', '●');
 
 //TODO : Finir de corriger les erreurs validator (8 errors 1 warning actuellement)
-//TODO : verifier la meilleure solution pour la taille des dossiers/fichiers
+//TODO : gérer la durée du cache (la fréquence d'actualisation)
+//TODO : Commenter et ré arranger le code 
 
 ?>
 
@@ -106,6 +109,8 @@ define('EMPTY_GLYPH', '●');
             echo "</ul>
 
       <div class='displayFolders'>
+
+
       <ul style='list-style:none'>";
             foreach ($results as $dir) {
                 $glyphs = '';
@@ -116,10 +121,10 @@ define('EMPTY_GLYPH', '●');
                     $glyphs .= EMPTY_GLYPH . ' ';
                 }
                 echo "<li class='file-info'>
-                 <span class='glyphs'>{$glyphs}</span>
-                     <a href='{$dir['path']}'" . ($dir['has_html'] ? " target='_blank'" : "") . ">{$dir['name']}</a>
-                    <p>({$dir['size']})</p>
-                </li>";
+             <span class='glyphs'>{$glyphs}</span>
+             <a href='{$dir['path']}'" . ($dir['has_html'] ? " target='_blank'" : "") . ">{$dir['name']}</a>
+             <p>({$dir['size']}, modifié le {$dir['last_modified']})</p>
+          </li>";
             }
             echo "</ul>";
             echo "</div>";

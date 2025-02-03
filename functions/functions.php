@@ -37,19 +37,6 @@ function hasSubDirectories($dir)
   }
   return false;
 }
-
-
-function calculateFolderSize($dir)
-{
-  $size = 0;
-
-  foreach (glob(rtrim($dir, '/') . '/*', GLOB_NOSORT) as $each) {
-    $size += is_file($each) ? filesize($each) : calculateFolderSize($each);
-  }
-
-  return $size;
-}
-
 function hasHtmlFile($dir)
 {
   foreach (new DirectoryIterator($dir) as $fileinfo) {
@@ -62,9 +49,6 @@ function hasHtmlFile($dir)
 }
 
 
-
-
-
 //convert bytes 
 function sizeFilter($bytes)
 {
@@ -75,39 +59,78 @@ function sizeFilter($bytes)
   return (round($bytes, 2) . " " . $label[$i]);
 }
 
-
-//trying this function to cache the folders size to optimise application
-function getCachedFolderSize($dir)
+function calculateFolderSize($dir)
 {
-  $cacheFile = sys_get_temp_dir() . "folder_size_cache_" . md5($dir)  . '.txt';
-  if (file_exists($cacheFile) && (time() - filemtime($cacheFile) < 3600)) {
-    return file_get_contents($cacheFile);
-  } else {
-    $size = calculateFolderSize($dir);
-    file_put_contents($cacheFile, $size);
-    return $size;
+  $size = 0;
+  foreach (new RecursiveIteratorIterator(new RecursiveDirectoryIterator($dir)) as $file) {
+    if ($file->isFile()) {
+      $size += $file->getSize();
+    }
   }
+  return $size;
 }
 
-//function to clear cache
-function clearCache($dir)
+function getLastModifiedDate($dir)
 {
-  $cacheFile = sys_get_temp_dir() . "/folder_size_cache_" . md5($dir) . '.txt';
+  date_default_timezone_set('Europe/Paris');
+  $lastModified = 0;
+  foreach (new RecursiveIteratorIterator(new RecursiveDirectoryIterator($dir)) as $file) {
+    if ($file->isFile()) {
+      $fileModified = $file->getMTime();
+      if ($fileModified > $lastModified) {
+        $lastModified = $fileModified;
+      }
+    }
+  }
+  return $lastModified ? date('Y-m-d H:i:s', $lastModified) : 'N/A';
+}
+
+
+function getCachedFolderInfo($dir)
+{
+  $cacheFile = sys_get_temp_dir() . "/folder_info_cache.json";
+  $cacheData = [];
+
+  // Charger le cache existant
   if (file_exists($cacheFile)) {
-    unlink($cacheFile);
+    $cacheData = json_decode(file_get_contents($cacheFile), true);
+  }
+
+  // Vérifier si le cache pour ce dossier est valide
+  if (isset($cacheData[$dir]) && (time() - $cacheData[$dir]['timestamp'] < 3600)) {
+    error_log("Utilisation du cache pour le dossier : " . $dir);
+    return $cacheData[$dir];
+  } else {
+    error_log("Recalcul des informations pour le dossier : " . $dir);
+    $info = [
+      'size' => calculateFolderSize($dir),
+      'last_modified' => getLastModifiedDate($dir),
+      'timestamp' => time() // Ajouter un timestamp pour gérer l'expiration
+    ];
+    $cacheData[$dir] = $info;
+    file_put_contents($cacheFile, json_encode($cacheData));
+    return $info;
   }
 }
 
 
-/*fonctions pour pouvoir tester la performance de la mise en cache et de l'affichage des tailles des dossiers
+// function getCachedFolderSize($dir)
+// {
+//   $cacheFile = sys_get_temp_dir() . "folder_size_cache_" . md5($dir)  . '.txt';
+//   if (file_exists($cacheFile) && (time() - filemtime($cacheFile) < 3600)) {
+//     return file_get_contents($cacheFile);
+//   } else {
+//     $size = calculateFolderSize($dir);
+//     file_put_contents($cacheFile, $size);
+//     return $size;
+//   }
+// }
 
-  function startTimer() {
-  return microTime(true);
-  }
-
-  function endTimer($start) {
-    return microTime(true) - $start;
-  }
-  
-
-  */
+// //function to clear cache
+// function clearCache($dir)
+// {
+//   $cacheFile = sys_get_temp_dir() . "/folder_size_cache_" . md5($dir) . '.txt';
+//   if (file_exists($cacheFile)) {
+//     unlink($cacheFile);
+//   }
+// }
