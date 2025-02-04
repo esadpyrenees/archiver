@@ -2,44 +2,65 @@
 
 class CacheManager
 {
-  private string $cacheFile;
+  private static $cacheFile;
 
-  public function __construct()
+  public static function init()
   {
-    $this->cacheFile = sys_get_temp_dir() . "/folder_info_cache.json";
+    self::$cacheFile = sys_get_temp_dir() . DIRECTORY_SEPARATOR . 'folder_info_cache.json';
   }
 
-  /**
-   * Récupère les informations du cache si elles sont valides
-   */
-  public function getCachedInfo(string $dir): ?array
+
+  public static function getCachedFolderInfo($dir)
   {
-    if (!file_exists($this->cacheFile)) {
-      return null;
+    self::init(); // Initialiser le chemin du fichier cache
+
+    if (file_exists(self::$cacheFile)) {
+      $cacheData = json_decode(file_get_contents(self::$cacheFile), true);
+    } else {
+      $cacheData = [];
     }
 
-    $cacheData = json_decode(file_get_contents($this->cacheFile), true);
-
-    if (isset($cacheData[$dir]) && (time() - $cacheData[$dir]['timestamp'] < 3600)) {
+    // Vérifier si le cache pour ce dossier est valide
+    if (isset($cacheData[$dir]) && (time() - $cacheData[$dir]['timestamp'] < 86400)) {
+      error_log("Utilisation du cache pour le dossier : " . $dir);
       return $cacheData[$dir];
     }
 
-    return null;
+    error_log("Recalcul des informations pour le dossier : " . $dir);
+    $info = [
+      'size' => self::calculateFolderSize($dir),
+      'last_modified' => self::getLastModifiedDate($dir),
+      'timestamp' => time()
+    ];
+    $cacheData[$dir] = $info;
+    file_put_contents(self::$cacheFile, json_encode($cacheData));
+    return $info;
   }
 
-  /**
-   * Sauvegarde les informations du dossier en cache
-   */
-  public function saveToCache(string $dir, array $info): void
+
+  private static function calculateFolderSize($dir)
   {
-    $cacheData = [];
-
-    if (file_exists($this->cacheFile)) {
-      $cacheData = json_decode(file_get_contents($this->cacheFile), true);
+    $size = 0;
+    foreach (new RecursiveIteratorIterator(new RecursiveDirectoryIterator($dir)) as $file) {
+      if ($file->isFile()) {
+        $size += $file->getSize();
+      }
     }
+    return $size;
+  }
 
-    $info['timestamp'] = time();
-    $cacheData[$dir] = $info;
-    file_put_contents($this->cacheFile, json_encode($cacheData));
+  private static function getLastModifiedDate($dir)
+  {
+    date_default_timezone_set('Europe/Paris');
+    $lastModified = 0;
+    foreach (new RecursiveIteratorIterator(new RecursiveDirectoryIterator($dir)) as $file) {
+      if ($file->isFile()) {
+        $fileModified = $file->getMTime();
+        if ($fileModified > $lastModified) {
+          $lastModified = $fileModified;
+        }
+      }
+    }
+    return $lastModified ? date('Y-m-d H:i:s', $lastModified) : 'N/A';
   }
 }

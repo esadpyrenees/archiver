@@ -23,9 +23,17 @@ function hasMDIndex($dir)
   return false;
 }
 
+function hasHTMLIndex($dir)
+{
+  foreach (glob($dir . '/index.html', GLOB_BRACE) as $file) {
+    return $file;
+  }
+}
+
+
 function isEmpty($dir)
 {
-  return !(new \FilesystemIterator($dir))->valid();
+  return !(new FilesystemIterator($dir))->valid();
 }
 
 function hasSubDirectories($dir)
