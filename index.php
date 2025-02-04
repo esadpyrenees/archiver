@@ -51,6 +51,8 @@ if ($fileHandler->hasHTMLIndex($currentdir)) {
 }
 
 //TODO : Finir de corriger les erreurs validator (8 errors 1 warning actuellement)
+//TODO : corriger redirection vers index.html dans les dossiers 
+//TODO : 
 
 
 ?>
