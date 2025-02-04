@@ -1,20 +1,13 @@
-# Archivals Lister
 
-Here is a program that I created for [ESAD Pyrénées Website](https://ateliers.esad-pyrenees.fr/web/archives/) to manage and display files and folders from the FTPS Server , used to stock students projects and archivals.
+<details markdown="1">
+  <summary>à propos</summary>
+  <div markdown="1">
 
-I created this as a part of my internship at ESAD
+  # Archives des Ateliers web
 
-## ⚙️ What does this program do
+  Espace de publication des projets de _web design_ et de _creative coding_ des étudiant·es de l’École supérieure d’art et de design des Pyrénées.
+  
+  Cet espace est rendu fonctionnel par un programme développé par [Erwan Demay](https://github.com/ErwanDemay) et [Julien Bidoret](https://github.com/jbidoret), diffusé sous licence AGPL3.0 : [github.com/esadpyrenees/archiver](https://github.com/esadpyrenees/archiver). Il utilise les librairies [Parsedown](https://github.com/erusev/parsedown), [ParsedownExtra](https://github.com/erusev/parsedown-extra) et [ParsedownExtraPlugin](https://github.com/taufik-nurrohman/parsedown-extra-plugin/).
 
-This PHP program calculate folders and sub-folders sizes and display it next to each file/folder in the arborescence , so that we can manage if a folder is taking a lot of stockage on the servor.
-
-### 🚀 Next features to add
-
-- Stock the folder's size in cache to optimise the performance
-- Display the upload date and calculate it on a folder by his subfolder most récent file uploaded
-- Improve the styling
-
-## 👥 Authors
-
-- **[Julien Bidoret](https://github.com/jbidoret)** - Creator
-- **[Erwan Demay](https://github.com/ErwanDemay)** - Student Developper
+  </div>
+</details>
