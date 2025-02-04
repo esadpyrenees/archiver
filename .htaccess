@@ -2,6 +2,8 @@
 RewriteEngine On
 
 # archives
+RewriteRule ^$ archives [L]
+
 RewriteCond %{REQUEST_FILENAME} !-f
 RewriteRule ^archives/(.*) index.php?params=$1 [L]
 
