@@ -85,7 +85,7 @@ define('EMPTY_GLYPH', '●');
 
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="" width=device-width, initial-scale="1.0" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Archives ESAD</title>
     <link rel="stylesheet" href="<?= str_replace("index.php", "style/style.css", $_SERVER['SCRIPT_NAME']) ?>">
 </head>
@@ -94,14 +94,16 @@ define('EMPTY_GLYPH', '●');
     <main class="pane active" id="content">
         <h1>Archives</h1>
         <nav class="archives-nav">
-            <p>☺</p>
             <?php
+            // breadcrumb
+            $currentFolderName = basename($currentdir);
             echo "<ul class='parentFolder'>";
-            if ($params) {
+            if ($params && $params != "/") {
                 $up = dirname($currentdir);
-                $upname = basename($up);
-                $currentFolderName = basename($currentdir);
-                echo "<li><a href='../'/>← $upname / $currentFolderName</a></li>";
+                $upname = basename($up);                
+                echo "<li><a href='../'/>← $upname</a> / $currentFolderName</li>";
+            } else {
+                echo "<li>$currentFolderName</li>";
             }
 
             // Sort and display the directory content
