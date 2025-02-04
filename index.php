@@ -2,18 +2,22 @@
 include_once 'functions/functions.php';
 include_once '_inc/Parsedown.php';
 include_once '_inc/ParsedownExtra.php';
+include_once '_inc/ParsedownExtraPlugin.php';
+
 $params = '';
 if (isset($_GET['params'])) {
     $params = '/' . $_GET['params'];
 }
 
 // $archivesdir = '../../archives';
-
-$archivesdir = dirname(__FILE__) . "/archives";
+$rootdir = dirname(__FILE__);
+$archivesdir = $rootdir . "/archives";
 $currentdir = $archivesdir . $params;
+$root_url =  str_replace("index.php", "", $_SERVER['SCRIPT_NAME']);
 
 // markdown!
-$Parsedown = new ParsedownExtra();
+$Parsedown = new ParsedownExtraPlugin();
+$Parsedown->figuresEnabled = true;
 
 // Start timer for cached size calculation
 //$startCached = startTimer();
@@ -26,6 +30,7 @@ $forbidden_extensions = array('psd', 'tif', 'tiff', 'ai', 'indd');
 if (is_dir($currentdir)) {
     foreach (new DirectoryIterator($currentdir) as $fileinfo) {
         if ($fileinfo->isDot()) continue; // Ignore . et ..
+        if (str_starts_with($fileinfo->getFilename(), ".")) continue;
 
         if ($fileinfo->isDir()) { // Subfolder find
             $folderPath = $fileinfo->getPathname();
@@ -51,7 +56,7 @@ if (is_dir($currentdir)) {
             }
             $results[] = [
                 'path' =>  $fileinfo->getFilename() . '/' . ($html_file ? $html_filename : ''), //adding the path to the html file which is into the folder 
-                'name' => $fileinfo->getFilename() . '/',
+                'name' => $fileinfo->getFilename() ,
                 'is_empty' => isEmpty($folderPath),
                 'size' => sizeFilter($folderInfo['size']),
                 'last_modified' => $folderInfo['last_modified'],
@@ -71,8 +76,24 @@ if (is_dir($currentdir)) {
     }
 }
 
-define('WARNING_GLYPH', '⚠');
+define('WARNING_GLYPH', '▲');
 define('EMPTY_GLYPH', '●');
+
+// build a breadcrumb
+if ($params) {
+    $breadcrumb = [];
+    $path = str_replace($rootdir, "", $currentdir);
+    $parts =  explode(DIRECTORY_SEPARATOR, trim($path, DIRECTORY_SEPARATOR));
+    $currentPath = '';
+    foreach ($parts as $part) {
+        $currentPath .= $part . DIRECTORY_SEPARATOR ;
+        $breadcrumb[] = "<a href=\"$root_url$currentPath\">$part</a>";
+    }
+    $breadcrumb = implode(" / ", $breadcrumb);
+} 
+
+// Sort and display the directory content
+rsort($results);
 
 //TODO : Finir de corriger les erreurs validator (8 errors 1 warning actuellement)
 //TODO : gérer la durée du cache (la fréquence d'actualisation)
@@ -82,63 +103,42 @@ define('EMPTY_GLYPH', '●');
 
 <!DOCTYPE html>
 <html lang="fr">
-
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Archives ESAD</title>
-    <link rel="stylesheet" href="<?= str_replace("index.php", "style/style.css", $_SERVER['SCRIPT_NAME']) ?>">
+    <link rel="stylesheet" href="<?= $root_url ?>/style/style.css">    
 </head>
 
 <body>
-    <main class="pane active" id="content">
-        <h1>Archives</h1>
+    <main id="archives">
         <nav class="archives-nav">
-            <?php
-            // breadcrumb
-            $currentFolderName = basename($currentdir);
-            echo "<ul class='parentFolder'>";
-            if ($params && $params != "/") {
-                $up = dirname($currentdir);
-                $upname = basename($up);                
-                echo "<li><a href='../'/>← $upname</a> / $currentFolderName</li>";
-            } else {
-                echo "<li>$currentFolderName</li>";
-            }
-
-            // Sort and display the directory content
-            rsort($results);
-            echo "</ul>
-
-      <div class='displayFolders'>
-
-
-      <ul style='list-style:none'>";
-            foreach ($results as $dir) {
-                $glyphs = '';
-                if ($dir['has_forbidden']) {
-                    $glyphs .= WARNING_GLYPH . ' ';
-                }
-                if ($dir['is_empty']) {
-                    $glyphs .= EMPTY_GLYPH . ' ';
-                }
-                echo "<li class='file-info'>
-             <span class='glyphs'>{$glyphs}</span>
-             <a href='{$dir['path']}'" . ($dir['has_html'] ? " target='_blank'" : "") . ">{$dir['name']}</a>
-             <p>({$dir['size']}, modifié le {$dir['last_modified']})</p>
-          </li>";
-            }
-            echo "</ul>";
-            echo "</div>";
-
-            // Display the content of index.md if it exists
-            $mdindex = hasMDIndex($currentdir);
-            if ($mdindex) {
-                echo "<hr>";
-                echo $Parsedown->text(file_get_contents($mdindex));
-            }
-            ?>
+            <p class='parentFolder'><?= $breadcrumb ?></p>
+            <ul class='displayFolders'>
+                <?php foreach ($results as $dir) :                        
+                    if ($dir['has_forbidden'] || $dir['is_empty']) {
+                        $glyphs =  ($dir['has_forbidden'] ? WARNING_GLYPH : "") . " " . ($dir['is_empty'] ? EMPTY_GLYPH : "");
+                    } else {
+                        $glyphs = '';
+                    }
+                ?>
+                <li class='file-info'>
+                    <a href="<?= $dir['path'] ?>"><?= $dir['name'] ?></a>
+                    <span class="glyphs"><?= $glyphs ?></span>
+                    <span class="size"><?= $dir['size'] ?></span>
+                    <span class="date"><?= $dir['last_modified'] ?></span>
+                </li>
+                <?php endforeach ?>
+            </ul>
         </nav>
+        <?php 
+        // Display the content of index.md if it exists
+        $mdindex = hasMDIndex($currentdir);
+        if ($mdindex) :?>
+            <div class="markdown">
+                <?= $Parsedown->text(file_get_contents($mdindex)) ?>
+            </div>
+        <?php endif  ?>
     </main>
 </body>
 
