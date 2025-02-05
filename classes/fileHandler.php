@@ -53,7 +53,7 @@ class FileHandler
     $hasIndexHtml = file_exists($folderPath . '/index.html');
 
     return [
-      'path' => $fileinfo->getFilename(),
+      'path' => $fileinfo->getFilename() . '/',
       'name' => $fileinfo->getFilename(),
       'is_empty' => $this->isEmpty($folderPath),
       'size' => $this->formatSize($folderInfo['size']),
