@@ -5,24 +5,26 @@ include '_inc/ParsedownExtraPlugin.php';
 require_once 'classes/DirectoryNavigator.php';
 require_once 'classes/FileHandler.php';
 
-
+//On définit l'url racine
 $root_url =  str_replace("index.php", "", $_SERVER['SCRIPT_NAME']);
 
 // markdown!
 $Parsedown = new ParsedownExtraPlugin();
 $Parsedown->figuresEnabled = true;
 
+
+//On récupère les paramètres de l'URL
 $params = '';
 if (isset($_GET['params'])) {
     $params = '/' . $_GET['params'];
 }
 
-// $archivesdir = '../../archives';
+//On définit les chemins des repertoires dans lesquels naviguer
 $rootdir = dirname(__FILE__);
 $archivesdir = $rootdir . "/archives";
 $currentdir = $archivesdir . $params;
 
-
+//On définit les constantes pour les différents glyphes 
 define('WARNING_GLYPH', '▲');
 define('EMPTY_GLYPH', '●');
 define('SPACE_GLYPH', '␣');
@@ -41,18 +43,17 @@ if ($params) {
     $breadcrumb = implode(" / ", $breadcrumb);
 }
 
+//On initialise un objet de la classe DirectoryNavigator
 $navigator = new DirectoryNavigator($archivesdir, $params);
 $results = $navigator->getFilesAndFolders();
 rsort($results);
 
+//On initialise un objet de la classe FileHandler
 $fileHandler = new FileHandler();
-if ($fileHandler->hasHTMLIndex($currentdir)) {
-    exit;
-}
+
 
 //TODO : Finir de corriger les erreurs validator (8 errors 1 warning actuellement)
 //TODO : corriger redirection vers index.html dans les dossiers 
-//TODO : 
 
 
 ?>
@@ -97,10 +98,8 @@ if ($fileHandler->hasHTMLIndex($currentdir)) {
                 <?php endforeach ?>
             </ul>
         </nav>
-
-
         <?php
-        // Display the content of index.md if it exists
+        // Affiche le contenu du fichier index.md s'il existe
         $mdindex = $fileHandler->hasMDIndex($currentdir);
         if ($mdindex) : ?>
             <div class="markdown">

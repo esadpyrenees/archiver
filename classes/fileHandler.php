@@ -1,12 +1,26 @@
 <?php
 
+/**
+ * Récupère la liste des fichiers et dossiers d'un répertoire donné.
+ *
+ * @param string $path Chemin absolu du répertoire à explorer.
+ * @return array Tableau contenant les fichiers et dossiers (associatif avec leurs informations).
+ */
 class FileHandler
 {
   private $cool_extensions = ['jpg', 'png', 'pdf', 'gif', 'webp', 'html', 'zip', 'css', 'js'];
   private $forbidden_extensions = ['psd', 'tif', 'tiff', 'ai', 'indd'];
 
+
+  /**
+   * Summary of listDirectory
+   * @param string $path Chemin du repertoire a explorer.
+   * retourne un tableau de tous les fichiers et dossiers contenus dans le repertoire
+   */
   public function listDirectory($path)
   {
+    if (!is_dir($path)) return [];
+
     $results = [];
     if (!is_dir($path)) return $results;
 
@@ -16,56 +30,92 @@ class FileHandler
       if ($fileinfo->getExtension() == 'md') continue;
 
       if ($fileinfo->isDir()) {
-        $folderPath = $fileinfo->getPathname();
-        $folderInfo = CacheManager::getCachedFolderInfo($folderPath);
-        $has_forbidden = $this->containsForbiddenFiles($folderPath);
-        $html_file = $this->getHtmlFile($folderPath);
-        $has_spaces = $this->containsSpace($fileinfo->getFilename());
-
-
-        $results[] = [
-          'path' => $fileinfo->getFilename() . '/',
-          'name' => $fileinfo->getFilename(),
-          'is_empty' => $this->isEmpty($folderPath),
-          'size' => $this->formatSize($folderInfo['size']),
-          'last_modified' => $folderInfo['last_modified'],
-          'has_forbidden' => $has_forbidden,
-          'has_html' => $html_file,
-          'has_spaces' => $has_spaces
-        ];
+        $results[] = $this->processDirectory($fileinfo);
       } else {
-        $is_forbidden = in_array($fileinfo->getExtension(), $this->forbidden_extensions);
-        $has_spaces = $this->containsSpace($fileinfo->getFilename());
-        $results[] = [
-          'path' => $fileinfo->getFilename(),
-          'name' => $fileinfo->getFilename(),
-          'is_empty' => false,
-          'size' => $this->formatSize($fileinfo->getSize()),
-          'last_modified' => date('Y-m-d H:i:s', $fileinfo->getMTime()),
-          'has_forbidden' => $is_forbidden,
-          'has_html' => false,
-          'has_spaces' => $has_spaces
-        ];
-        if ($fileinfo->getExtension() == 'html') {
-          $result['has_html'] = true;
-        }
+        $results[] = $this->processFile($fileinfo);
       }
     }
     return $results;
   }
 
+  /**
+   * Summary of processDirectory
+   * @param DirectoryIterator $fileinfo qui est un objet de la classe DirectoryIterator représentant le dossier
+   * @return array Informations sur le dossier en paramètre
+   */
+  private function processDirectory($fileinfo)
+  {
+    $folderPath = $fileinfo->getPathname();
+    $folderInfo = CacheManager::getCachedFolderInfo($folderPath);
+
+
+    // Check for index.html in this directory
+    $hasIndexHtml = file_exists($folderPath . '/index.html');
+
+    return [
+      'path' => $fileinfo->getFilename(),
+      'name' => $fileinfo->getFilename(),
+      'is_empty' => $this->isEmpty($folderPath),
+      'size' => $this->formatSize($folderInfo['size']),
+      'last_modified' => $folderInfo['last_modified'],
+      'has_forbidden' => $this->containsForbiddenFiles($folderPath),
+      'has_spaces' => $this->containsSpace($fileinfo->getFilename()),
+    ];
+  }
+
+
+  /**
+   * Summary of processFile
+   * @param DirectoryIterator $fileinfo qui est un objet de la classe DirectoryIterator représentant le fichier.
+   * @return array Informations sur le fichier en paramètre
+   */
+  private function processFile($fileinfo)
+  {
+    $isHtml = $fileinfo->getExtension() == 'html';
+    $isIndex = $isHtml && strtolower($fileinfo->getFilename()) === 'index.html';
+
+    return [
+      'path' => $fileinfo->getFilename(),
+      'name' => $fileinfo->getFilename(),
+      'is_empty' => false,
+      'size' => $this->formatSize($fileinfo->getSize()),
+      'last_modified' => date('Y-m-d H:i:s', $fileinfo->getMTime()),
+      'has_forbidden' => in_array($fileinfo->getExtension(), $this->forbidden_extensions),
+      'has_spaces' => $this->containsSpace($fileinfo->getFilename()),
+    ];
+  }
+
+
+
+  /**
+   * Summary of hasIndex
+   * @param string $dir Chemin du dossier
+   * @return string|false Nom du fichier index s'il existe , false sinon
+   */
   public function hasIndex($dir)
   {
-    $s = scandir($dir);
-    $fs = array_diff($s, array(".", ".."));
-    foreach ($fs as $f) {
-      if (in_array($f, ["index.html", "index.php", "index.htm"])) {
-        return $f;
+    $indexFiles = ["index.html", "index.php", "index.htm"];
+    foreach ($indexFiles as $indexFile) {
+      $indexPath = $dir . '/' . $indexFile;
+      if (file_exists($indexPath)) {
+
+        // Redirection vers le fichier index trouvé
+        $relativePath = str_replace($_SERVER['DOCUMENT_ROOT'], '', realpath($indexPath));
+        $relativePath = ltrim($relativePath, '/');
+        $url = $_SERVER['REQUEST_SCHEME'] . '://' . $_SERVER['HTTP_HOST'] . '/' . ltrim($relativePath, '/');
+
+        header('Location: ' . $url);
+        exit;
       }
     }
     return false;
   }
 
+  /**
+   * Summary of hasMDIndex
+   * @param string $dir Chemin du dossier
+   * @return string|false Chemin du fichier index.md s'il existe , false sinon 
+   */
   public function hasMDIndex($dir)
   {
     foreach (glob($dir . '/index.md', GLOB_BRACE) as $file) {
@@ -74,26 +124,24 @@ class FileHandler
     return false;
   }
 
-  public function hasHTMLIndex($dir)
-  {
-    foreach (glob($dir . '/index.html', GLOB_BRACE) as $file) {
-      // Redirection vers le fichier index.html trouvé
-      $relativePath = str_replace($_SERVER['DOCUMENT_ROOT'], '', realpath($file));
-      $url = $_SERVER['REQUEST_SCHEME'] . '://' . $_SERVER['HTTP_HOST'] . '/' . ltrim($relativePath, '/');
-      header('Location: ' . $url);
-      exit; // Assurez-vous de terminer le script après la redirection
-    }
-    return false;
-  }
-
+  /**
+   * Summary of isEmpty
+   * @param string $dir chemin du dossier
+   * @return bool True si le dossier est vide , retourne false sinon
+   */
   public function isEmpty($dir)
   {
-    return !(new \FilesystemIterator($dir))->valid();
+    return !(new FilesystemIterator($dir))->valid();
   }
 
+  /**
+   * Summary of hasSubDirectories
+   * @param string $dir chemin du dossier
+   * @return bool true si le dossier a des sous dossiers , false sinon
+   */
   public function hasSubDirectories($dir)
   {
-    foreach (new \DirectoryIterator($dir) as $fileinfo) {
+    foreach (new DirectoryIterator($dir) as $fileinfo) {
       if ($fileinfo->isDir() && !$fileinfo->isDot()) {
         return true;
       }
@@ -101,15 +149,27 @@ class FileHandler
     return false;
   }
 
+  /**
+   * Summary of containsForbiddenFiles
+   * Verifie la présence de fichiers interdits dans un dossier
+   * @param string $folderPath 
+   * @return bool True si les fichiers interdits sont présents, retourne false sinon
+   */
   private function containsForbiddenFiles($folderPath)
   {
-    foreach (new \DirectoryIterator($folderPath) as $fileinfo) {
+    foreach (new DirectoryIterator($folderPath) as $fileinfo) {
       if ($fileinfo->isDot()) continue;
       if (in_array($fileinfo->getExtension(), $this->forbidden_extensions)) return true;
     }
     return false;
   }
 
+  /**
+   * Summary of containsSpace
+   * Vérifie la présence d'espaces dans le nom d'un fichier
+   * @param string $filename nom du fichier
+   * @return bool True si les espaces sont présents , false sinon
+   */
   private function containsSpace($filename)
   {
     if (str_contains($filename, ' ')) {
@@ -119,16 +179,12 @@ class FileHandler
     }
   }
 
-
-  private function getHtmlFile($folderPath)
-  {
-    foreach (new \DirectoryIterator($folderPath) as $fileinfo) {
-      if ($fileinfo->isDot()) continue;
-      if ($fileinfo->getExtension() == 'html') return $fileinfo->getFilename();
-    }
-    return false;
-  }
-
+  /**
+   * Summary of formatSize
+   * Formate la taille d'un fichier pour plus de lisibilité
+   * @param int $bytes Taille en octets
+   * @return string Taille formatée
+   */
   private function formatSize($bytes)
   {
     $units = ['B', 'KB', 'MB', 'GB', 'TB'];
