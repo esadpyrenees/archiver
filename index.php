@@ -2,8 +2,8 @@
 include '_inc/Parsedown.php';
 include '_inc/ParsedownExtra.php';
 include '_inc/ParsedownExtraPlugin.php';
-require_once 'classes/DirectoryNavigator.php';
-require_once 'classes/FileHandler.php';
+require_once __DIR__ . '/classes/DirectoryNavigator.php';
+require_once __DIR__ .  '/classes/FileHandler.php';
 
 //On définit l'url racine
 $root_url =  str_replace("index.php", "", $_SERVER['SCRIPT_NAME']);
@@ -86,7 +86,7 @@ $fileHandler = new FileHandler();
                     }
                     if ($dir['has_spaces']) {
                         $glyphs = $glyphs . ' ' . SPACE_GLYPH;
-                        $title = $title . ' Ce fichier a un espace dans son nom . Merci de corriger cela :) ';
+                        $title = $title . ' Ce dosser contient un fichier qui a un espace , un accent ou un caractère spécial dans son nom . Merci de corriger cela :) ';
                     }
                 ?>
                     <li class='file-info'>

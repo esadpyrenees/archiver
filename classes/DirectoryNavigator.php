@@ -1,7 +1,7 @@
 <?php
 
-require_once 'FileHandler.php';
-require_once 'CacheManager.php';
+require_once __DIR__ . '/FileHandler.php';
+require_once __DIR__ .  '/CacheManager.php';
 
 /**
  * Class DirectoryNavigator

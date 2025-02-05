@@ -48,18 +48,17 @@ class FileHandler
     $folderPath = $fileinfo->getPathname();
     $folderInfo = CacheManager::getCachedFolderInfo($folderPath);
 
-
-    // Check for index.html in this directory
-    $hasIndexHtml = file_exists($folderPath . '/index.html');
+    // Check for index in this directory
+    $pathSuffix = fileHandler::getPathSuffix($folderPath);
 
     return [
-      'path' => $fileinfo->getFilename() . '/',
+      'path' => $fileinfo->getFilename() . $pathSuffix,
       'name' => $fileinfo->getFilename(),
       'is_empty' => $this->isEmpty($folderPath),
       'size' => $this->formatSize($folderInfo['size']),
       'last_modified' => $folderInfo['last_modified'],
       'has_forbidden' => $this->containsForbiddenFiles($folderPath),
-      'has_spaces' => $this->containsSpace($fileinfo->getFilename()),
+      'has_spaces' => $this->containsSpace($folderPath),
     ];
   }
 
@@ -71,17 +70,14 @@ class FileHandler
    */
   private function processFile($fileinfo)
   {
-    $isHtml = $fileinfo->getExtension() == 'html';
-    $isIndex = $isHtml && strtolower($fileinfo->getFilename()) === 'index.html';
-
     return [
       'path' => $fileinfo->getFilename(),
       'name' => $fileinfo->getFilename(),
       'is_empty' => false,
       'size' => $this->formatSize($fileinfo->getSize()),
       'last_modified' => date('Y-m-d H:i:s', $fileinfo->getMTime()),
-      'has_forbidden' => in_array($fileinfo->getExtension(), $this->forbidden_extensions),
-      'has_spaces' => $this->containsSpace($fileinfo->getFilename()),
+      'has_forbidden' => false,   //in_array($fileinfo->getExtension(), $this->forbidden_extensions),
+      'has_spaces' => false,
     ];
   }
 
@@ -92,23 +88,16 @@ class FileHandler
    * @param string $dir Chemin du dossier
    * @return string|false Nom du fichier index s'il existe , false sinon
    */
-  public function hasIndex($dir)
+  public static function  getPathSuffix($dir)
   {
     $indexFiles = ["index.html", "index.php", "index.htm"];
     foreach ($indexFiles as $indexFile) {
       $indexPath = $dir . '/' . $indexFile;
       if (file_exists($indexPath)) {
-
-        // Redirection vers le fichier index trouvé
-        $relativePath = str_replace($_SERVER['DOCUMENT_ROOT'], '', realpath($indexPath));
-        $relativePath = ltrim($relativePath, '/');
-        $url = $_SERVER['REQUEST_SCHEME'] . '://' . $_SERVER['HTTP_HOST'] . '/' . ltrim($relativePath, '/');
-
-        header('Location: ' . $url);
-        exit;
+        return '/' . $indexFile;
       }
     }
-    return false;
+    return '/';
   }
 
   /**
@@ -166,18 +155,21 @@ class FileHandler
 
   /**
    * Summary of containsSpace
-   * Vérifie la présence d'espaces dans le nom d'un fichier
-   * @param string $filename nom du fichier
-   * @return bool True si les espaces sont présents , false sinon
+   * Vérifie la présence de fichier contenant des espaces , accents ou caractères spéciaux dans un dossier 
+   * @param string $folderPath 
+   * @return bool True si les espaces sont présents ,  accents ou catactères spéciaux sont présents , false sinon
    */
-  private function containsSpace($filename)
+  private function containsSpace($folderPath)
   {
-    if (str_contains($filename, ' ')) {
-      return true;
-    } else {
-      return false;
+    foreach (new DirectoryIterator($folderPath) as $fileinfo) {
+      if ($fileinfo->isDot()) continue;
+      if (preg_match('/(?![a-zA-Z0-9\_\-\.]).+$/', $fileinfo->getFilename())) {
+        return true;
+      }
     }
+    return false;
   }
+
 
   /**
    * Summary of formatSize
