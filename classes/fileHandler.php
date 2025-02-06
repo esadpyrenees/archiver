@@ -8,9 +8,7 @@
  */
 class FileHandler
 {
-  private $cool_extensions = ['jpg', 'png', 'pdf', 'gif', 'webp', 'html', 'zip', 'css', 'js'];
   private $forbidden_extensions = ['psd', 'tif', 'tiff', 'ai', 'indd'];
-
 
   /**
    * Summary of listDirectory
@@ -48,7 +46,7 @@ class FileHandler
     $folderPath = $fileinfo->getPathname();
     $folderInfo = CacheManager::getCachedFolderInfo($folderPath);
 
-    // Check for index in this directory
+    // Check for index files in this directory
     $pathSuffix = fileHandler::getPathSuffix($folderPath);
 
     return [
@@ -76,7 +74,7 @@ class FileHandler
       'is_empty' => false,
       'size' => $this->formatSize($fileinfo->getSize()),
       'last_modified' => date('Y-m-d H:i:s', $fileinfo->getMTime()),
-      'has_forbidden' => false,   //in_array($fileinfo->getExtension(), $this->forbidden_extensions),
+      'has_forbidden' => false,
       'has_spaces' => false,
     ];
   }

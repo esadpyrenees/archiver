@@ -1,6 +1,5 @@
 <?php
 
-
 /**
  * Summary of CacheManager
  * Gère la mise en cache des infos des dossiers/fichiers dans un format json pour alléger et améliorer les performances.
@@ -37,11 +36,11 @@ class CacheManager
     // Vérifier si le cache pour ce dossier est valide
     if (isset($cacheData[$dir]) && (time() - $cacheData[$dir]['timestamp'] < 86400)) {
       //debug dans le fichier php_error
-      error_log("Utilisation du cache pour le dossier : " . $dir);
+      //error_log("Utilisation du cache pour le dossier : " . $dir);
       return $cacheData[$dir];
     }
     //debug dans le fichier php_error
-    error_log("Recalcul des informations pour le dossier : " . $dir);
+    //error_log("Recalcul des informations pour le dossier : " . $dir);
     $info = [
       'size' => self::calculateFolderSize($dir),
       'last_modified' => self::getLastModifiedDate($dir),
@@ -75,7 +74,7 @@ class CacheManager
    * Cette fonction parcourt tous les fichiers du dossier spécifié et retourne la date de dernière modification
    * la plus récente parmi tous les fichiers.
    * @param string $dir Chemin du dossier
-   * @return string Date de dernière modification formatée dans notre fuseau horraire
+   * @return string Date de dernière modification formatée dans notre fuseau horraire ou 'N/A' si pas de date
    */
   private static function getLastModifiedDate($dir)
   {

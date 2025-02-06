@@ -51,11 +51,6 @@ rsort($results);
 //On initialise un objet de la classe FileHandler
 $fileHandler = new FileHandler();
 
-
-//TODO : Finir de corriger les erreurs validator (8 errors 1 warning actuellement)
-//TODO : corriger redirection vers index.html dans les dossiers 
-
-
 ?>
 
 <!DOCTYPE html>
