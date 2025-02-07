@@ -1,22 +1,21 @@
-# Archivals Lister
+# Archiver
 
-Here is a program that I created for [ESAD Pyrénées Website](https://ateliers.esad-pyrenees.fr/web/archives/) to manage and display files and folders from the FTPS Server , used to stock students projects and archivals.
+Archiver is a PHP program to manage and display files and folders on a filesystem.
 
-I created this as a part of my internship at ESAD 
+Its has been developped by [Erwan Demay](https://github.com/ErwanDemay) as a part of his internship at ÉSAD Pyrénées, to be used on [Ateliers website](https://ateliers.esad-pyrenees.fr/web/archives/), to store and display students projects.
+
 
 ## ⚙️ What does this program do 
 
-This PHP  program calculate folders and sub-folders sizes and display it next to each file/folder in the arborescence , so that we can manage if a folder is taking a lot of stockage on the servor.
-
-
-### 🚀 Next features to add
-
-- Stock the folder's size in cache to optimise the performance
-- Display the upload date and calculate it on a folder by his subfolder most récent file uploaded
-- Improve the styling 
-
+- It recursively computes folders weights and stores the values in cache,
+- It recursively computes folders last modification dates,
+- It warns about empty folders, spaces or weird characters in filenames.
 
 ## 👥 Authors
 
-- **[Julien Bidoret](https://github.com/jbidoret)** - Creator 
-- **[Erwan Demay](https://github.com/ErwanDemay)** - Student Developper 
+- [Julien Bidoret](https://github.com/jbidoret)
+- [Erwan Demay](https://github.com/ErwanDemay)
+
+## Credits
+
+Archiver relies on [Parsedown](https://github.com/erusev/parsedown), [ParsedownExtra](https://github.com/erusev/parsedown-extra) by  Emanuil Rusev and [ParsedownExtraPlugin](https://github.com/taufik-nurrohman/parsedown-extra-plugin/) by Taufik Nurrohman. The UI font is [CommitMono](https://commitmono.com/) by Eigil Nikolajsen.
