@@ -17,8 +17,6 @@ class FileHandler
    */
   public function listDirectory($path)
   {
-    if (!is_dir($path)) return [];
-
     $results = [];
     if (!is_dir($path)) return $results;
 
