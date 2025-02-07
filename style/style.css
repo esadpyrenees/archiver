@@ -42,6 +42,7 @@
   --spacing: 2rem;
   --basesize: 1em;
 }
+
 body {
   font-family: "CommitMono", monospace;
   line-height: 1.6;
@@ -55,9 +56,15 @@ body {
   min-height: 100dvh;
 }
 
+
+/* Headers */
 h1  {
   font-size: 1em;
 }
+h2 {
+  margin: calc(2 * var(--spacing)) 0 var(--spacing) ;
+}
+
 /* Navigation and lists */
 .archives-nav {
   margin: 2rem 0;
@@ -120,55 +127,17 @@ h1  {
 }
 
 
-/* Headers */
-h2 {
-  margin: calc(2 * var(--spacing)) 0 var(--spacing) ;
-}
-
-/* Sélectioon */
-.markdown a {
-  color: currentColor;
-  text-decoration: underline;
-}
+/* Markdown */
 .markdown p,
 .markdown blockquote,
 .markdown ul,
 .markdown ol {
   max-width: 46em;
 }
-.markdown ul {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-  list-style-type: none;
-  margin-inline: 0;
-  padding-inline: 0; 
-  max-width: none;
-  gap: var(--spacing) 1em;
+.markdown a {
+  color: currentColor;
+  text-decoration: underline;
 }
-.selection {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-  gap: var(--spacing);
-}
-.selection figure {
-  margin: 0;
-  aspect-ratio: 16/9;
-  overflow: hidden;
-}
-.selection figure img {
-  width: 100%;
-  height: calc(100% - 1.6em);
-  object-fit: cover;
-}
-/* Markdown content */
-
-hr {
-  margin: 2rem 0;
-  border: none;
-  border-top: 1px solid #dadada;
-}
-
-/* ...existing code... */
 
 /* Responsive Design */
 @media (max-width: 768px) {
@@ -187,6 +156,3 @@ hr {
 
 }
 
-@media (max-width: 480px) {
-  
-}
