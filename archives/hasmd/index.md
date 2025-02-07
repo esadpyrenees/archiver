@@ -1,0 +1,1 @@
+A markdown file whose content is transformed into HTML and displayed below the folder tree, since its name is `index.md`.
