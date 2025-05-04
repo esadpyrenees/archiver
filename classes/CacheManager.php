@@ -36,28 +36,63 @@ class CacheManager
   {
     self::init(); // Initialiser le chemin du fichier cache
 
-    if (file_exists(self::$cacheFile)) {
-      $cacheData = json_decode(file_get_contents(self::$cacheFile), true);
-    } else {
-      $cacheData = [];
-    }
+    $realPath = realpath($dir);
+    if (!$realPath) return null;
 
     // Vérifier si le cache pour ce dossier est valide
-    if (isset($cacheData[$dir]) && (time() - $cacheData[$dir]['timestamp'] < 86400)) {
-      //debug dans le fichier php_error
-      //error_log("Utilisation du cache pour le dossier : " . $dir);
-      return $cacheData[$dir];
+    $isFresh = isset(self::$cacheData[$realPath]) && (time() - self::$cacheData[$realPath]['timestamp'] < self::FRESHNESS_THRESHOLD);
+    if ($isFresh) {
+      return self::$cacheData[$realPath] + ['status' => 'fresh'];
     }
+
+    // Use stale cached data if available
+    if (isset(self::$cacheData[$realPath])) {
+      self::triggerBackgroundUpdate($realPath); // fire & forget
+      return self::$cacheData[$realPath] + ['status' => 'stale'];
+    }
+
     //debug dans le fichier php_error
     //error_log("Recalcul des informations pour le dossier : " . $dir);
     $info = [
-      'size' => self::calculateFolderSize($dir),
-      'last_modified' => self::getLastModifiedDate($dir),
-      'timestamp' => time()
+      'size' => self::calculateFolderSize($realPath),
+      'last_modified' => self::getLastModifiedDate($realPath),
+      'timestamp' => time(),
+      'status' => 'fresh'
     ];
-    $cacheData[$dir] = $info;
-    file_put_contents(self::$cacheFile, json_encode($cacheData, JSON_PRETTY_PRINT));
+
+    self::$cacheData[$realPath] = $info;
+    self::saveCache();
     return $info;
+  }
+
+  /**
+   * Recursively process a directory tree and update the cache if needed.
+   * Returns an array of all processed directory infos.
+   */
+  public static function processDirectoryTree($rootDir)
+  {
+    self::init();
+    $results = [];
+
+    $iterator = new RecursiveIteratorIterator(
+      new RecursiveDirectoryIterator($rootDir, FilesystemIterator::SKIP_DOTS),
+      RecursiveIteratorIterator::SELF_FIRST
+    );
+
+    foreach ($iterator as $file) {
+      if ($file->isDir()) {
+        $dirPath = $file->getRealPath();
+        $results[$dirPath] = self::getCachedFolderInfo($dirPath);
+      }
+    }
+
+    // Also process the root directory itself
+    $rootReal = realpath($rootDir);
+    if ($rootReal && is_dir($rootReal)) {
+      $results[$rootReal] = self::getCachedFolderInfo($rootReal);
+    }
+
+    return $results;
   }
 
 
@@ -70,11 +105,25 @@ class CacheManager
   private static function calculateFolderSize($dir)
   {
     $size = 0;
-    foreach (new RecursiveIteratorIterator(new RecursiveDirectoryIterator($dir)) as $file) {
-      if ($file->isFile()) {
-        $size += $file->getSize();
+    $iterator = new DirectoryIterator($dir);
+
+    foreach ($iterator as $fileinfo) {
+      if ($fileinfo->isDot()) continue;
+
+      $path = $fileinfo->getPathname();
+
+      if ($fileinfo->isFile()) {
+        $size += $fileinfo->getSize();
+
+      } elseif ($fileinfo->isDir()) {
+        // Check if cached info for subdir is fresh
+        $cached = self::getCachedFolderInfo($path); // will refresh if stale
+        if ($cached && isset($cached['size'])) {
+          $size += $cached['size'];
+        }
       }
     }
+
     return $size;
   }
 
