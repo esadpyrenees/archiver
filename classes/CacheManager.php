@@ -80,7 +80,7 @@ class CacheManager
   {
     date_default_timezone_set('Europe/Paris');
     $lastModified = 0;
-    foreach (new RecursiveIteratorIterator(new RecursiveDirectoryIterator($dir)) as $file) {
+    foreach (new RecursiveIteratorIterator(new RecursiveDirectoryIterator($dir, FilesystemIterator::SKIP_DOTS)) as $file) {
       if ($file->isFile()) {
         $fileModified = $file->getMTime();
         if ($fileModified > $lastModified) {
