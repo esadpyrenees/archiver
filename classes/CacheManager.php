@@ -99,4 +99,27 @@ class CacheManager
     }
     return $lastModified ? date('Y-m-d H:i:s', $lastModified) : 'N/A';
   }
+
+  /**
+   * Async update of cache
+   */
+  private static function triggerBackgroundUpdate($path)
+  {
+      $script = escapeshellarg(__DIR__ . '/update_cache.php');
+      $dirArg = escapeshellarg($path);
+
+      $cmd = "php $script $dirArg > /dev/null 2>&1 &";
+
+      // error_log("Triggering cache update: $cmd");
+
+      exec($cmd);
+  }
+
+  /**
+   * Save cache
+   */
+  private static function saveCache()
+  {
+    file_put_contents(self::$cacheFile, json_encode(self::$cacheData, JSON_PRETTY_PRINT));
+  }
 }
