@@ -8,13 +8,22 @@
 class CacheManager
 {
   private static $cacheFile;
+  private static $cacheData = [];
+  private static $initialized = false;
+  private const FRESHNESS_THRESHOLD = 86400; // 24 hours
+
 
   /**
-   *On initialise le cache en précisant le repertoire et le nom du fichier de cache
+   * On initialise le cache en précisant le repertoire et le nom du fichier de cache
    */
   public static function init()
   {
-    self::$cacheFile = sys_get_temp_dir() . DIRECTORY_SEPARATOR . 'folder_info_cache.json';
+    if (self::$initialized) return;
+    self::$cacheFile = sys_get_temp_dir() . DIRECTORY_SEPARATOR . 'folder_info_cache.json';    
+    if (file_exists(self::$cacheFile)) {
+      self::$cacheData = json_decode(file_get_contents(self::$cacheFile), true) ?? [];
+    }
+    self::$initialized = true;
   }
 
   /**
