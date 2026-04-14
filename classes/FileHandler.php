@@ -11,9 +11,10 @@ class FileHandler
   private $forbidden_extensions = ['psd', 'tif', 'tiff', 'ai', 'indd'];
 
   /**
-   * Summary of listDirectory
-   * @param string $path Chemin du repertoire a explorer.
-   * retourne un tableau de tous les fichiers et dossiers contenus dans le repertoire
+   * Liste les fichiers et dossiers d'un répertoire.
+   *
+   * @param string $path Chemin du répertoire à explorer
+   * @return array
    */
   public function listDirectory($path)
   {
@@ -22,7 +23,7 @@ class FileHandler
 
     foreach (new DirectoryIterator($path) as $fileinfo) {
       if ($fileinfo->isDot()) continue;
-      if (str_starts_with($fileinfo->getFilename(), ".")) continue;
+      if (substr($fileinfo->getFilename(), 0, 1) === ".") continue;
       if ($fileinfo->getExtension() == 'md') continue;
 
       if ($fileinfo->isDir()) {
@@ -35,34 +36,38 @@ class FileHandler
   }
 
   /**
-   * Summary of processDirectory
-   * @param DirectoryIterator $fileinfo qui est un objet de la classe DirectoryIterator représentant le dossier
-   * @return array Informations sur le dossier en paramètre
+   * Construit les informations d'affichage pour un dossier.
+   *
+   * @param DirectoryIterator $fileinfo Entrée représentant un dossier
+   * @return array
    */
   private function processDirectory($fileinfo)
   {
     $folderPath = $fileinfo->getPathname();
     $folderInfo = CacheManager::getCachedFolderInfo($folderPath);
+    $directoryFlags = $this->collectDirectoryFlags($folderPath);
 
-    // Check for index files in this directory
+    // Vérifie la présence d'un index dans ce dossier.
     $pathSuffix = fileHandler::getPathSuffix($folderPath);
 
     return [
       'path' => $fileinfo->getFilename() . $pathSuffix,
       'name' => $fileinfo->getFilename(),
-      'is_empty' => $this->isEmpty($folderPath),
+      'is_empty' => $directoryFlags['is_empty'],
       'size' => $this->formatSize($folderInfo['size']),
+      'status' => $folderInfo['status'],
       'last_modified' => $folderInfo['last_modified'],
-      'has_forbidden' => $this->containsForbiddenFiles($folderPath),
-      'has_spaces' => $this->containsSpace($folderPath),
+      'has_forbidden' => $directoryFlags['has_forbidden'],
+      'has_spaces' => $directoryFlags['has_spaces'],
     ];
   }
 
 
   /**
-   * Summary of processFile
-   * @param DirectoryIterator $fileinfo qui est un objet de la classe DirectoryIterator représentant le fichier.
-   * @return array Informations sur le fichier en paramètre
+   * Construit les informations d'affichage pour un fichier.
+   *
+   * @param DirectoryIterator $fileinfo Entrée représentant un fichier
+   * @return array
    */
   private function processFile($fileinfo)
   {
@@ -80,9 +85,10 @@ class FileHandler
 
 
   /**
-   * Summary of hasIndex
+   * Retourne le suffixe de navigation d'un dossier selon l'index présent.
+   *
    * @param string $dir Chemin du dossier
-   * @return string|false Nom du fichier index s'il existe , false sinon
+   * @return string Suffixe '/' ou '/index.*'
    */
   public static function  getPathSuffix($dir)
   {
@@ -97,9 +103,21 @@ class FileHandler
   }
 
   /**
-   * Summary of hasMDIndex
+   * Retourne le nom de l'index d'un dossier s'il existe.
+   *
    * @param string $dir Chemin du dossier
-   * @return string|false Chemin du fichier index.md s'il existe , false sinon 
+   * @return string Nom du fichier index, ou chaîne vide
+   */
+  public function hasIndex($dir)
+  {
+    return ltrim($this->getPathSuffix($dir), '/');
+  }
+
+  /**
+   * Retourne le chemin de `index.md` s'il existe dans le dossier.
+   *
+   * @param string $dir Chemin du dossier
+   * @return string|false
    */
   public function hasMDIndex($dir)
   {
@@ -110,68 +128,51 @@ class FileHandler
   }
 
   /**
-   * Summary of isEmpty
-   * @param string $dir chemin du dossier
-   * @return bool True si le dossier est vide , retourne false sinon
+   * Parcourt le dossier une seule fois et calcule les indicateurs utilisés par l'UI.
+   * Conserve le comportement existant tout en réduisant les accès disque.
+   *
+   * @param string $folderPath
+   * @return array{is_empty: bool, has_forbidden: bool, has_spaces: bool}
    */
-  public function isEmpty($dir)
+  private function collectDirectoryFlags($folderPath)
   {
-    return !(new FilesystemIterator($dir))->valid();
-  }
+    $isEmpty = true;
+    $hasForbidden = false;
+    $hasSpaces = false;
 
-  /**
-   * Summary of hasSubDirectories
-   * @param string $dir chemin du dossier
-   * @return bool true si le dossier a des sous dossiers , false sinon
-   */
-  public function hasSubDirectories($dir)
-  {
-    foreach (new DirectoryIterator($dir) as $fileinfo) {
-      if ($fileinfo->isDir() && !$fileinfo->isDot()) {
-        return true;
+    foreach (new DirectoryIterator($folderPath) as $fileinfo) {
+      if ($fileinfo->isDot()) {
+        continue;
+      }
+
+      $isEmpty = false;
+
+      if (!$hasForbidden && in_array($fileinfo->getExtension(), $this->forbidden_extensions, true)) {
+        $hasForbidden = true;
+      }
+
+      if (!$hasSpaces && preg_match('/(?![a-zA-Z0-9\_\-\.]).+$/', $fileinfo->getFilename())) {
+        $hasSpaces = true;
+      }
+
+      if ($hasForbidden && $hasSpaces) {
+        break;
       }
     }
-    return false;
-  }
 
-  /**
-   * Summary of containsForbiddenFiles
-   * Verifie la présence de fichiers interdits dans un dossier
-   * @param string $folderPath 
-   * @return bool True si les fichiers interdits sont présents, retourne false sinon
-   */
-  private function containsForbiddenFiles($folderPath)
-  {
-    foreach (new DirectoryIterator($folderPath) as $fileinfo) {
-      if ($fileinfo->isDot()) continue;
-      if (in_array($fileinfo->getExtension(), $this->forbidden_extensions)) return true;
-    }
-    return false;
-  }
-
-  /**
-   * Summary of containsSpace
-   * Vérifie la présence de fichier contenant des espaces , accents ou caractères spéciaux dans un dossier 
-   * @param string $folderPath 
-   * @return bool True si les espaces sont présents ,  accents ou catactères spéciaux sont présents , false sinon
-   */
-  private function containsSpace($folderPath)
-  {
-    foreach (new DirectoryIterator($folderPath) as $fileinfo) {
-      if ($fileinfo->isDot()) continue;
-      if (preg_match('/(?![a-zA-Z0-9\_\-\.]).+$/', $fileinfo->getFilename())) {
-        return true;
-      }
-    }
-    return false;
+    return [
+      'is_empty' => $isEmpty,
+      'has_forbidden' => $hasForbidden,
+      'has_spaces' => $hasSpaces,
+    ];
   }
 
 
   /**
-   * Summary of formatSize
-   * Formate la taille d'un fichier pour plus de lisibilité
+   * Formate une taille en octets dans une unité lisible.
+   *
    * @param int $bytes Taille en octets
-   * @return string Taille formatée
+   * @return string
    */
   private function formatSize($bytes)
   {

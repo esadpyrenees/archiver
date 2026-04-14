@@ -5,6 +5,8 @@ include '_inc/ParsedownExtraPlugin.php';
 require_once __DIR__ . '/classes/DirectoryNavigator.php';
 require_once __DIR__ .  '/classes/FileHandler.php';
 
+date_default_timezone_set('Europe/Paris');
+
 //On définit l'url racine
 $root_url =  str_replace("index.php", "", $_SERVER['SCRIPT_NAME']);
 
@@ -51,6 +53,10 @@ rsort($results);
 //On initialise un objet de la classe FileHandler
 $fileHandler = new FileHandler();
 
+$index = $fileHandler->hasIndex($currentdir);
+if($index){
+    header('Location: ' . $index);
+}
 ?>
 
 <!DOCTYPE html>
@@ -60,7 +66,7 @@ $fileHandler = new FileHandler();
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Archives ESAD</title>
-    <link rel="stylesheet" href="<?= $root_url ?>/style/style.css">
+    <link rel="stylesheet" href="<?= $root_url ?>/style/style.css">    
 </head>
 
 <body>
@@ -73,7 +79,7 @@ $fileHandler = new FileHandler();
                     $title = '';
                     if ($dir['has_forbidden']) {
                         $glyphs = $glyphs . WARNING_GLYPH;
-                        $title = $title . 'Ce dossier contient un fichier avec une extension interdite';
+                        $title = $title . ' Ce dossier contient un fichier avec une extension interdite';
                     }
                     if ($dir['is_empty']) {
                         $glyphs = $glyphs . ' ' . EMPTY_GLYPH;
@@ -81,13 +87,13 @@ $fileHandler = new FileHandler();
                     }
                     if ($dir['has_spaces']) {
                         $glyphs = $glyphs . ' ' . SPACE_GLYPH;
-                        $title = $title . ' Ce dosser contient un fichier qui a un espace , un accent ou un caractère spécial dans son nom . Merci de corriger cela :) ';
+                        $title = $title . ' Le nom d’un fichier de ce dossier contient un espace, un accent ou un caractère spécial dans son nom . Merci de corriger cela :) ';
                     }
                 ?>
                     <li class='file-info'>
                         <a href="<?= $dir['path'] ?>"><?= $dir['name'] ?></a>
                         <span class="glyphs" title="<?= $title ?>"><?= $glyphs ?></span>
-                        <span class="size"><?= $dir['size'] ?></span>
+                        <span class="size"><?php if( isset($dir['status']) ) { echo $dir['status'] === 'stale' ? "~" : $dir['size']; } else { echo $dir['size']; }?></span>
                         <span class="date"><?= $dir['last_modified'] ?></span>
                     </li>
                 <?php endforeach ?>

@@ -9,3 +9,6 @@ archives/*
 !archives/hasindexhtml
 !archives/hasmd
 !archives/hassubdir
+
+# Logs
+*.log
