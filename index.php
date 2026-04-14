@@ -5,6 +5,8 @@ include '_inc/ParsedownExtraPlugin.php';
 require_once __DIR__ . '/classes/DirectoryNavigator.php';
 require_once __DIR__ .  '/classes/FileHandler.php';
 
+date_default_timezone_set('Europe/Paris');
+
 //On définit l'url racine
 $root_url =  str_replace("index.php", "", $_SERVER['SCRIPT_NAME']);
 
@@ -51,6 +53,10 @@ rsort($results);
 //On initialise un objet de la classe FileHandler
 $fileHandler = new FileHandler();
 
+$index = $fileHandler->hasIndex($currentdir);
+if($index){
+    header('Location: ' . $index);
+}
 ?>
 
 <!DOCTYPE html>
@@ -60,7 +66,7 @@ $fileHandler = new FileHandler();
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Archives ESAD</title>
-    <link rel="stylesheet" href="<?= $root_url ?>/style/style.css">
+    <link rel="stylesheet" href="<?= $root_url ?>/style/style.css">    
 </head>
 
 <body>

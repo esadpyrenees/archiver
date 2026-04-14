@@ -10,6 +10,15 @@ Its has been developped by [Erwan Demay](https://github.com/ErwanDemay) as a par
 - It recursively computes folders last modification dates,
 - It warns about empty folders, spaces or weird characters in filenames.
 
+## Update 2026
+
+Heavily rewritten to address performances issues:
+- Reduced per-folder filesystem scans 
+- Centralized cache path 
+- Get freshness by filesystem change, not TTL
+- Migrated cache store from JSON to SQLite 
+
+
 ## 👥 Authors
 
 - [Julien Bidoret](https://github.com/jbidoret)

@@ -12,7 +12,7 @@ if (!$targetDir || !is_dir($targetDir)) {
     exit(1);
 }
 
-$lockFile = sys_get_temp_dir() . '/cache_update_' . md5($targetDir) . '.lock';
+$lockFile = sys_get_temp_dir() . '/cache_update_global.lock';
 
 // Log start
 // file_put_contents($logFile, "[START] " . date('c') . " - $targetDir\n", FILE_APPEND);
