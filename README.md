@@ -4,7 +4,7 @@ Archiver is a PHP program to manage and display files and folders on a filesyste
 
 Its has been developped by [Erwan Demay](https://github.com/ErwanDemay) as a part of his internship at ÉSAD Pyrénées, to be used on [Ateliers website](https://ateliers.esad-pyrenees.fr/web/archives/), to store and display students projects.
 
-## ⚙️ What does this program do
+## What does this program do
 
 - It recursively computes folders weights and stores the values in cache,
 - It recursively computes folders last modification dates,
@@ -19,7 +19,7 @@ Heavily rewritten to address performances issues:
 - Migrated cache store from JSON to SQLite 
 
 
-## 👥 Authors
+## Authors
 
 - [Julien Bidoret](https://github.com/jbidoret)
 - [Erwan Demay--Peaucellier](https://github.com/ErwanDemay)
